@@ -1,0 +1,1 @@
+SELECT SUM(age>18 and age<25) FROM etudiants;
