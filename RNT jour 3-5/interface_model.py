@@ -1,4 +1,4 @@
-import pygame as pg
+import mysql.connector
 
 from interface_controller import Interface_controller
 from interface_views import Interface_viewer
@@ -18,22 +18,25 @@ class Interface_model(
 
     def update(self):
         self.interface_scenes_draw[self.scene]()
-        self.interface_scenes_objects[self.scene].draw_options()
+        # self.interface_scenes_objects[self.scene].draw_options()
 
     def init_interface_scenes_objects(self):
         self.main_interface : object = List_menu_model(
             self.screen,
             self.width, self.height,
-            ["Gestion", "Quitter"],
+            ["Gestion", "Quitter"], "quit",
             ["gestion_interface", "quit"],
-            "quit"
         )
         self.gestion_interface : object = List_menu_model(
             self.screen,
+            self.width, self.height*1.5,
+            ["Ajout", "Modification", "Suppression"], "main_interface",
+            ["add_product_interface", "alter_product_interface", "delete_product_interface"]
+        )
+        self.product_list : object = List_menu_model(
+            self.screen,
             self.width, self.height,
-            ["Ajout", "Modification", "Suppression"],
-            ["add_product_interface", "alter_product_interface", "delete_product_interface"],
-            "main_interface"
+            self.recover_product_list(), "quit"
         )
 
     def init_interface_scenes(self):
@@ -47,6 +50,20 @@ class Interface_model(
         }
         self.interface_scenes_objects : dict = {
             "main_interface" : self.main_interface,
-            "gestion_interface" : self.gestion_interface,
+            "gestion_interface" : self.product_list,
         }
 
+    @staticmethod
+    def connect_to_database():
+        return mysql.connector.connect(
+            user='python',
+            host='localhost',
+            password='python123456',
+            database='python_store_database'
+        )
+
+    def recover_product_list(self):
+        database = self.connect_to_database()
+        database_cursor = database.cursor()
+        database_cursor.execute("SELECT * FROM product")
+        return database_cursor.fetchall()

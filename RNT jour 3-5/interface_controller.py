@@ -52,12 +52,6 @@ class Interface_controller:
                         self.state.scene = back_scene
                     else:
                         self.done = True
-                elif pg.key.name(event.key) in ["return"]:
-                    next_scene = self.state.interface_scenes_objects[self.state.scene].next_list[self.state.interface_scenes_objects[self.state.scene].selected_index]
-                    if next_scene != "quit":
-                        self.state.scene = next_scene
-                    else:
-                        self.done = True
                 self.state.interface_scenes_events[self.state.scene](event)
                 self.state.interface_scenes_objects[self.state.scene].get_event_options(event)
     
@@ -77,8 +71,12 @@ class Interface_controller:
         pg.quit()
     
     def get_event_main_interface(self, event):
-        
-        pass
+        if pg.key.name(event.key) in ["return"]:
+            next_scene = self.interface_scenes_objects[self.scene].next_list[self.interface_scenes_objects[self.scene].selected_index]
+            if next_scene != "quit":
+                self.scene = next_scene
+            else:
+                self.done = True
 
     def get_event_gestion_interface(self, event):
-        pass
+        self.gestion_interface.get_event_horizontal(event)

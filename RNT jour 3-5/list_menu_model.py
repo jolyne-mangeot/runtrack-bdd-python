@@ -1,7 +1,7 @@
 import pygame as pg
 
 class List_menu_model():
-    def __init__(self, screen, width, height, options, next_list, back):
+    def __init__(self, screen, width, height, options, back, next_list = None):
         self.screen = screen
         self.from_left, self.from_top = (width/2, height/2)
         self.spacer = width/6
@@ -28,6 +28,8 @@ class List_menu_model():
         self.rendered = {"deselected":[], "selected":[]}
 
         for option in self.options:
+            if type(option) == tuple:
+                option = ' '.join(map(str, option))
             deselected_render = self.deselected_font.render(
                 option, True, self.deselected_color
             )
@@ -57,19 +59,58 @@ class List_menu_model():
             else:
                 self.screen.blit(option[0],option[1])
     
+    def draw_horizontal_options(self):
+        """
+            Draws the menu options in a horizontal arrangement.
+            The selected option is highlighted based on its index.
+        """
+        for index, option in enumerate(self.rendered["deselected"]):
+            if len(self.rendered["deselected"]) == 2:
+                option[1].center = ((self.from_left*2)/3 + index*(self.from_left*2)/3, self.from_top)
+            else:
+                option[1].center = ((self.from_left*2)*0.25 * (index+1), self.from_top)
+            if index == self.selected_index:
+                selected_render = self.rendered["selected"][index]
+                selected_render[1].midbottom = option[1].midbottom
+                self.screen.blit(selected_render[0], selected_render[1])
+            else:
+                self.screen.blit(option[0],option[1])
+
+    def draw_list_options(self):
+        for index, option in enumerate(self.rendered["deselected"]):
+            if self.selected_index-3 < index < self.selected_index:
+                option[1].midbottom = (
+                    self.from_left, 
+                    self.from_top - (self.selected_index-index)*(self.spacer*0.5)
+                )
+                self.screen.blit(option[0],option[1])
+            elif index == self.selected_index:
+                selected_render = self.rendered["selected"][index]
+                option[1].midbottom = selected_render[1].midbottom = (
+                    self.from_left, 
+                    self.from_top
+                )
+                self.screen.blit(selected_render[0], selected_render[1])
+            elif self.selected_index < index < self.selected_index+3:
+                option[1].midbottom = (
+                    self.from_left,
+                    self.from_top + (index-self.selected_index)*(self.spacer*0.5)
+                )
+                self.screen.blit(option[0],option[1])
+    
     def get_event_options(self, event):
-        """
-            Processes vertical movement (up and down) in the menu based on key events.
-        """
         if event.type == pg.KEYDOWN:
             if pg.key.name(event.key) in ["z","up"]:
                 self.change_selected_option(-1)
-                while self.options[self.selected_index] == "":
-                    self.change_selected_option(-1)
             elif pg.key.name(event.key) in ["s","down"]:
                 self.change_selected_option(1)
-                while self.options[self.selected_index] == "":
-                    self.change_selected_option(1)
+    
+    def get_event_horizontal(self, event):
+        if event.type == pg.KEYDOWN:
+            if pg.key.name(event.key) in ["q", "left"]:
+                self.change_selected_option(-1)
+            elif pg.key.name(event.key) in ["d", "right"]:
+                self.change_selected_option(1)
     
     def change_selected_option(self, operant):
         """

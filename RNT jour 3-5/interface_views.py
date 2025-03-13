@@ -6,4 +6,5 @@ class Interface_viewer:
         self.main_interface.draw_options()
     
     def draw_gestion_interface(self):
-        self.gestion_interface.draw_options()
+        self.gestion_interface.draw_horizontal_options()
+        self.product_list.draw_list_options()
